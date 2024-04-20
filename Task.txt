@@ -1,0 +1,27 @@
+There is a comma separated value (CSV) file taxonomy_iw.csv.gz given
+which forms a directed graph. It represents Wikipedia main topic classi-
+fication categories. Each line is a single record with two fields indicating
+category-subcategory relationship, e.g. :
+"1880s_films","1889_films"
+indicates that there is a "1880s_films" category which has "1889_films"
+subcategory.
+
+
+Steps:
+1. Knowing the data format and that it represents a graph, choose a
+database that can accommodate it. Design a database representation of the provided CSV data. Consult
+the schema or representation.
+2. Import the CSV into the database of your choosing.
+3. Implement a command line utility to meet the goals
+    - Finds all children of a given node,
+    - counts all children of a given node,
+    - Finds all grand children of a given node,
+    - Finds all parents of a given node,
+    - counts all parents of a given node,
+    - Finds all grand parents of a given node,
+    - counts how many uniquely named nodes there are,
+    - Finds a root node, one which is not a subcategory of any other node,
+    - Finds nodes with the most children, there could be more the one,
+    - Finds nodes with the least children, there could be more the one,
+    - renames a given node.
+4. Make the utility as fast as possible, use indexing if appropriate. Provide timings how fast it takes to run the command for each of the goals.

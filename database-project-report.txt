@@ -1,0 +1,29 @@
+Database Selection:
+Since I need to handle graph-like data efficiently, I'm choosing Neo4j as the database for storing and querying.
+
+Database Schema Design:
+In Neo4j, the data is represented using nodes and relationships. Each node represents a category, and the relationships represent the category-subcategory relationships.
+There would be a node label for the categories (e.g., "Category") and a relationship type for the subcategory relationships (e.g., "SUBCATEGORY_OF"). Each node should have a property for the category name (e.g., "name").
+
+Implementation:
+I'll be using the Neo4j query language, Cypher, to achieve the specified goals. To make the utility as fast as possible, I'll use indexing if appropriate.  
+
+
+----------------------------------------------------------
+
+# Import the CSV into the database:
+I have put the taxonomy_iw.csv file into the import directory of Neo4j installation.
+
+import query:
+LOAD CSV WITH HEADERS FROM 'file:///taxonomy_iw.csv' AS line
+MERGE (category:Category {name: line.category})
+MERGE (subcategory:Category {name: line.subcategory})
+CREATE (category)-[:SUBCATEGORY]->(subcategory)
+
+
+The command line utility using python is - "neo4j_project"
+
+# It seems that the "name" property of the "Category" nodes is frequently used
+ for matching. I created an index on the "name" property to speed up the search operations.
+
+# I checked the query execution time using the python time module
