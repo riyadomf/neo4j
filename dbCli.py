@@ -53,7 +53,7 @@ class DBCLI:
     def find_grandparents(self, node_name):
         with self.driver.session() as session:
             result = session.run(
-                "MATCH (p:Category {name: $node_name})-[:IS_PARENT_OF]->(c:Category)-[:IS_PARENT_OF]->(gp:Category) RETURN gp.name AS grandparent",
+                "MATCH (gp:Category)-[:IS_PARENT_OF]->(p:Category)-[:IS_PARENT_OF]->(c:Category {name: $node_name}) RETURN gp.name AS grandparent",
                 node_name=node_name
             )
             return [record["grandparent"] for record in result]
@@ -80,7 +80,11 @@ class DBCLI:
                 "RETURN p.name AS node, max(child_count) AS max_children "
                 "ORDER BY max_children DESC"
             )
-            return [record["node"] for record in result if record["max_children"] == result.peek()["max_children"]]
+            if result.peek() is not None:
+                max_children = result.peek()["max_children"]
+                return [record["node"] for record in result if record["max_children"] == max_children]
+            else:
+                return []
 
     def find_nodes_with_least_children(self):
         with self.driver.session() as session:
@@ -90,7 +94,11 @@ class DBCLI:
                 "RETURN p.name AS node, min(child_count) AS min_children "
                 "ORDER BY min_children"
             )
-            return [record["node"] for record in result if record["min_children"] == result.peek()["min_children"]]
+            if result.peek() is not None:
+                min_children = result.peek()["min_children"]
+                return [record["node"] for record in result if record["min_children"] == min_children]
+            else:
+                return []
 
     def rename_node(self, old_name, new_name):
         with self.driver.session() as session:

@@ -1,5 +1,5 @@
 myenv
-/myenv
+./myenv
 
 taxonomy.csv
 taxonomy_preprocessed.csv

@@ -12,16 +12,21 @@ I'll be using the Neo4j query language, Cypher, to achieve the specified goals. 
 ----------------------------------------------------------
 
 # Import the CSV into the database:
-I have put the taxonomy_iw.csv file into the import directory of Neo4j installation.
+I have put the taxonomy_iw.csv file into the import directory of Neo4j installation. 
+Since the CSV to import is a huge file I had to make use of CALL to commit periodically. 
+I committed after reading 1000 rows. 
 
 import query:
-LOAD CSV WITH HEADERS FROM 'file:///taxonomy_iw.csv' AS line
-MERGE (category:Category {name: line.category})
-MERGE (subcategory:Category {name: line.subcategory})
-CREATE (category)-[:SUBCATEGORY]->(subcategory)
+:auto LOAD CSV WITH HEADERS FROM 'file:///taxonomy_preprocessed.csv' AS row  CALL 
+{
+    with row
+    MERGE (parent:Category {name: row.parent_category})
+    MERGE (child:Category {name: row.child_category})
+    MERGE (parent)-[:IS_PARENT_OF]->(child)
+} IN TRANSACTIONS OF 1000 ROWS
 
 
-The command line utility using python is - "neo4j_project"
+The command line utility using python is - "dbCli.py"
 
 # It seems that the "name" property of the "Category" nodes is frequently used
  for matching. I created an index on the "name" property to speed up the search operations.
