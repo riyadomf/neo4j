@@ -3,6 +3,7 @@ from neo4j import GraphDatabase
 class Neo4jUtility:
     def __init__(self, uri, username, password):
         self.driver = GraphDatabase.driver(uri, auth=(username, password))
+        self.driver.verify_connectivity()
 
     def close(self):
         self.driver.close()
