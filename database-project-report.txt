@@ -1,29 +1,32 @@
-Database Selection:
-Since I need to handle graph-like data efficiently, I'm choosing Neo4j as the database for storing and querying.
-
-Database Schema Design:
-In Neo4j, the data is represented using nodes and relationships. Each node represents a category, and the relationships represent the category-subcategory relationships.
-There would be a node label for the categories (e.g., "Category") and a relationship type for the subcategory relationships (e.g., "SUBCATEGORY_OF"). Each node should have a property for the category name (e.g., "name").
-
-Implementation:
-I'll be using the Neo4j query language, Cypher, to achieve the specified goals. To make the utility as fast as possible, I'll use indexing if appropriate.  
+Graph Database Suggestion:
+Given the nature of the data and its graph-like structure, I'm choosing Neo4j as the database for storing and querying. It has really good visualization options and also supports indexing for efficient queries.
 
 
+Data Structure: 
+For the provided data structure, we have one type of node: Category. Each category can have multiple child categories, forming a directed edge from the category node to its child category node.
+Nodes: Represent categories.
+Edges: Represent the parent-child relationship between two category.
+
+
+
+Indexing and Visualization
+I'll be using the Neo4j query language, Cypher, to achieve the specified goals. Indexing is crucial for efficient querying in a graph database. I need to ensure that properties used for querying, such as category names, are indexed for faster lookups.
+I'll be using Neo4j visualization tools to generate visual representations of the graph.
 ----------------------------------------------------------
 
 # Import the CSV into the database:
-I have put the taxonomy_iw.csv file into the import directory of Neo4j installation. 
-Since the CSV to import is a huge file I had to make use of CALL to commit periodically. 
-I committed after reading 1000 rows. 
+Initially, I tried to import using LOAD CSV and Periodic commit but It was taking too much time.
+That's why I used neo4j-admin import tool.
 
-import query:
-:auto LOAD CSV WITH HEADERS FROM 'file:///taxonomy_preprocessed.csv' AS row  CALL 
-{
-    with row
-    MERGE (parent:Category {name: row.parent_category})
-    MERGE (child:Category {name: row.child_category})
-    MERGE (parent)-[:IS_PARENT_OF]->(child)
-} IN TRANSACTIONS OF 1000 ROWS
+At first I preprocessed the taxonomy.csv file by removing all the escaped quotations (\"). 
+Then I created a csv file with distinct nodes named category_nodes.csv from the taxonomy_preprocessed.csv file.
+
+Then I imported both the taxonomy_preprocessed.csv and category_nodes.csv and ran the neo4j-admin import command as below.
+
+bin/neo4j-admin database import full taxonomy 
+    --nodes "<file/path/of/category_nodes.csv>" 
+    --relationships "<file/path/of/taxonomy_preprocessed.csv>" 
+    --delimiter=,
 
 
 The command line utility using python is - "dbCli.py"
@@ -31,4 +34,4 @@ The command line utility using python is - "dbCli.py"
 # It seems that the "name" property of the "Category" nodes is frequently used
  for matching. I created an index on the "name" property to speed up the search operations.
 
-# I checked the query execution time using the python time module
+# I used the python time module to monitor the query execution time

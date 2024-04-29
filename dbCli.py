@@ -108,9 +108,21 @@ class DBCLI:
                 new_name=new_name
             )
             return result.single()["new_name"]
+        
+    def find_paths_between_nodes(self, start_node, end_node):
+        with self.driver.session() as session:
+            result = session.run(
+                "MATCH path = (start:Category {name: $start_node})-[:IS_PARENT_OF*]->(end:Category {name: $end_node}) "
+                "RETURN path",
+                start_node=start_node,
+                end_node=end_node
+            )
+            paths = [record["path"] for record in result]
+            return paths
 
 
-    def run_command(self, goal_number, node_name=None):
+
+    def run_command(self, goal_number, node_name=None, another_node_name=None):
         start_time = time.time()
         if goal_number == "1":
             children = self.find_children(node_name)
@@ -143,10 +155,11 @@ class DBCLI:
             nodes_with_least_children = self.find_nodes_with_least_children()
             print("Nodes with the least children:", nodes_with_least_children)
         elif goal_number == "11":
-            old_name = input("Enter the node's old name: ")
-            new_name = input("Enter the node's new name: ")
-            renamed_node = self.rename_node(old_name, new_name)
+            renamed_node = self.rename_node(node_name, another_node_name)
             print("Node renamed. New name:", renamed_node)
+        elif goal_number == "12":
+            paths = self.find_paths_between_nodes(node_name, another_node_name)
+            print("Paths between", node_name, "and", another_node_name, ":", paths)
         else:
             print("Invalid goal number.")
 
@@ -162,14 +175,19 @@ class DBCLI:
         goal_number = sys.argv[1]
         if len(sys.argv) == 3:
             node_name = sys.argv[2]
+            another_node_name = None
+        elif len(sys.argv) == 4:
+            node_name = sys.argv[2]
+            another_node_name = sys.argv[3]
         else:
             node_name = None
+            another_node_name = None
 
-        self.run_command(goal_number, node_name)
+        self.run_command(goal_number, node_name, another_node_name)
 
 
 if __name__ == "__main__":
-    uri = "bolt://localhost:7687/neo4j"
+    uri = "bolt://localhost:7687"
     user = "neo4j"
     password = "password"
 
